@@ -1,0 +1,2495 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Track S9 - Enterprise Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #eef2f8;
+      --panel: #ffffff;
+      --panel-soft: #f4f8ff;
+      --txt: #101b2d;
+      --txt-soft: #4f5f7b;
+      --border: #cdd8e8;
+      --brand: #0f4c81;
+      --brand-soft: #dfeffd;
+      --accent: #dc8a2f;
+      --ok: #0f7f55;
+      --ok-bg: #e4f9ef;
+      --warn: #8d5a00;
+      --warn-bg: #fff2d4;
+      --danger: #9c2d2d;
+      --danger-bg: #fde7e7;
+      --neutral: #4f5666;
+      --neutral-bg: #e9edf2;
+      --changed: #0e5aa9;
+      --changed-bg: #ddecfd;
+      --unchanged: #5844a9;
+      --unchanged-bg: #ece9ff;
+      --radius: 14px;
+      --shadow: 0 14px 34px rgba(10, 36, 72, 0.13);
+      --shadow-soft: 0 5px 18px rgba(18, 37, 71, 0.09);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+      color: var(--txt);
+      background:
+        radial-gradient(circle at 8% 8%, #ffffff 0%, #e3edf9 32%, transparent 56%),
+        radial-gradient(circle at 100% 0%, #d9ebff 0%, transparent 44%),
+        var(--bg);
+      min-height: 100vh;
+    }
+
+    .wrap {
+      width: min(1480px, 96vw);
+      margin: 26px auto 36px;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 18px;
+      align-items: start;
+      transition: grid-template-columns .22s ease;
+    }
+
+    .top-progress-banner {
+      display: grid;
+      grid-template-columns: minmax(360px, 1.15fr) minmax(420px, 1fr);
+      gap: 18px;
+      align-items: stretch;
+      background: linear-gradient(135deg, #10223e, #16345b 48%, #214870 100%);
+      color: #eef8ff;
+      border: 1px solid #2f79a9;
+      box-shadow: var(--shadow);
+      border-radius: 20px;
+      padding: 20px 22px;
+      margin: 18px 0 14px;
+      overflow: hidden;
+    }
+
+    .banner-main {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      justify-content: center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .banner-main-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      width: 100%;
+    }
+
+    .banner-title {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(233, 242, 255, 0.82);
+    }
+
+    .banner-body {
+      display: flex;
+      width: 100%;
+      align-items: center;
+      gap: 20px;
+      justify-content: space-between;
+      min-width: 0;
+    }
+
+    .banner-copy {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      min-width: 140px;
+      flex: 0 0 auto;
+    }
+
+    .banner-bar-only {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .banner-bar-only .bar {
+      margin-top: 0;
+      flex: 1;
+    }
+
+    .banner-pct {
+      font-size: 40px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1;
+    }
+
+    .banner-meta {
+      font-size: 12px;
+      color: rgba(226, 237, 255, 0.85);
+    }
+
+    .bar {
+      width: 100%;
+      height: 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.17);
+      margin-top: 12px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+
+    .bar > span {
+      display: block;
+      height: 100%;
+      width: 0%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, #7fd1ff 0%, #90f0dc 100%);
+      transition: width .25s ease;
+    }
+
+    .banner-kpis {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(92px, 1fr));
+      gap: 10px;
+      min-width: 420px;
+    }
+
+    .kpi {
+      padding: 14px 14px 13px;
+      border-radius: 16px;
+      background: rgba(255,255,255,0.09);
+      border: 1px solid rgba(255,255,255,0.14);
+      backdrop-filter: blur(2px);
+    }
+
+    .kpi .v {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .kpi .l {
+      margin-top: 4px;
+      font-size: 11px;
+      color: rgba(228, 237, 255, 0.84);
+    }
+
+    /* Analytics Dashboard Styling */
+    .analytics-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      box-shadow: var(--shadow-soft);
+      margin: 18px 0 14px;
+      overflow: hidden;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .analytics-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      background: #fbfdff;
+    }
+
+    .analytics-title-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--brand);
+    }
+
+    .analytics-title-group h2 {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--txt);
+    }
+
+    .analytics-icon {
+      color: var(--brand);
+    }
+
+    .analytics-toggle {
+      border: 1px solid var(--border);
+      background: #fff;
+      color: var(--txt-soft);
+      border-radius: 10px;
+      padding: 6px 12px;
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    .analytics-toggle:hover {
+      border-color: #a3bbd8;
+      color: var(--txt);
+    }
+
+    .analytics-toggle svg {
+      transition: transform 0.3s;
+    }
+
+    .analytics-card.collapsed .analytics-toggle svg {
+      transform: rotate(180deg);
+    }
+
+    .analytics-card.collapsed .analytics-content {
+      max-height: 0;
+      padding: 0;
+      border-top: none;
+      opacity: 0;
+    }
+
+    .analytics-content {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      padding: 20px;
+      transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), padding 0.4s ease, opacity 0.3s;
+      max-height: 1000px;
+      opacity: 1;
+      overflow: hidden;
+    }
+
+    .chart-container {
+      background: var(--panel-soft);
+      border: 1px solid rgba(205, 216, 232, 0.6);
+      border-radius: 16px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 250px;
+    }
+
+    .chart-wrapper {
+      position: relative;
+      width: 100%;
+      height: 150px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .doughnut-wrapper {
+      height: 150px;
+    }
+
+    .chart-center-text {
+      position: absolute;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      top: 52%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+    }
+
+    .chart-center-text .pct-val {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--txt);
+      line-height: 1;
+    }
+
+    .chart-center-text .pct-lbl {
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: var(--txt-soft);
+      margin-top: 2px;
+    }
+
+    .chart-info {
+      width: 100%;
+      text-align: center;
+      margin-top: 10px;
+    }
+
+    .chart-info h3 {
+      margin: 0 0 4px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--txt);
+    }
+
+    .chart-info p {
+      margin: 0;
+      font-size: 11px;
+      color: var(--txt-soft);
+    }
+
+    .main {
+      min-width: 0;
+    }
+
+    .toolbar {
+      background: var(--panel);
+      border-radius: 18px;
+      box-shadow: var(--shadow-soft);
+      border: 1px solid var(--border);
+      padding: 16px;
+      position: sticky;
+      top: 16px;
+      z-index: 5;
+    }
+
+    .toolbar-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .search {
+      flex: 1;
+      min-width: 220px;
+      height: 42px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: #fff;
+      padding: 0 14px;
+      font-size: 14px;
+      color: var(--txt);
+      outline: none;
+    }
+
+    .search:focus { border-color: #8cb2dc; box-shadow: 0 0 0 3px #eaf2fb; }
+
+    .toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--txt-soft);
+      background: var(--panel-soft);
+      border: 1px solid var(--border);
+      border-radius: 11px;
+      padding: 8px 11px;
+    }
+
+    .toggle input { accent-color: var(--brand); }
+
+    .pills {
+      margin-top: 12px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .pill {
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 6px 12px;
+      font-size: 12px;
+      cursor: pointer;
+      user-select: none;
+      background: #fff;
+      color: var(--txt-soft);
+      transition: .18s ease;
+    }
+
+    .pill:hover { border-color: #a3bbd8; color: var(--txt); }
+    .pill.active { background: var(--brand); border-color: var(--brand); color: #f4fbff; font-weight: 700; }
+
+    .content { margin-top: 16px; }
+
+    .module {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: var(--shadow-soft);
+      margin-bottom: 14px;
+      overflow: hidden;
+    }
+
+    .module-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      padding: 13px 15px;
+      border-left: 4px solid #5f6d87;
+      background: #fbfdff;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .module-head h2 {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+    }
+
+    .module-meta {
+      font-size: 12px;
+      color: var(--txt-soft);
+    }
+
+    .sub {
+      padding: 10px 12px 14px;
+      border-bottom: 1px dashed #dbe4f0;
+    }
+
+    .sub:last-child { border-bottom: 0; }
+
+    .sub-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+      font-size: 13px;
+      font-weight: 700;
+      color: #33425d;
+    }
+
+    .table-wrap { overflow-x: auto; }
+
+    table {
+      width: 100%;
+      min-width: 980px;
+      border-collapse: collapse;
+      font-size: 12px;
+      table-layout: fixed;
+    }
+
+    col.col-course { width: 34%; }
+    col.col-status { width: 28%; }
+    col.col-progress { width: 18%; }
+    col.col-date { width: 10%; }
+    col.col-notes { width: 10%; }
+
+    th {
+      text-align: left;
+      padding: 7px 8px;
+      font-size: 10.5px;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: #76839c;
+      border-bottom: 1px solid #d8e1ee;
+      background: #f8fbff;
+    }
+
+    td {
+      padding: 8px;
+      border-bottom: 1px solid #edf2f8;
+      color: #2f3b52;
+      vertical-align: top;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    td:last-child {
+      white-space: normal;
+      word-break: break-word;
+    }
+
+    tr:hover td { background: #f8fbff; }
+    tr:last-child td { border-bottom: 0; }
+
+    .title-cell {
+      font-weight: 600;
+      min-width: 220px;
+    }
+
+    .quick-add-btn {
+      border: 0;
+      background: transparent;
+      color: #74829a;
+      width: auto;
+      height: auto;
+      border-radius: 0;
+      font-size: 17px;
+      line-height: 1;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      flex: 0 0 auto;
+      padding: 0;
+      opacity: 0.72;
+    }
+
+    .quick-add-btn:hover {
+      opacity: 1;
+      color: #4c6484;
+    }
+
+    .notes-cell {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    .note-copy {
+      min-width: 0;
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .muted { color: #74829a; }
+
+    .status-select {
+      appearance: none;
+      border: 1px solid transparent;
+      border-radius: 999px;
+      padding: 4px 26px 4px 10px;
+      font-size: 11px;
+      font-weight: 700;
+      line-height: 1.2;
+      cursor: pointer;
+      max-width: 170px;
+      background-image:
+        linear-gradient(45deg, transparent 50%, currentColor 50%),
+        linear-gradient(135deg, currentColor 50%, transparent 50%);
+      background-position:
+        calc(100% - 12px) calc(50% - 2px),
+        calc(100% - 8px) calc(50% - 2px);
+      background-size: 4px 4px, 4px 4px;
+      background-repeat: no-repeat;
+      transition: border-color 0.2s, background-color 0.2s;
+    }
+
+    .status-wrap {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .s-done { background: var(--ok-bg); color: var(--ok); border-color: #98d7b8; }
+    .s-ongoing { background: var(--warn-bg); color: var(--warn); border-color: #ffd581; }
+    .s-not { background: var(--danger-bg); color: var(--danger); border-color: #f1b0b0; }
+    .s-hp { background: var(--neutral-bg); color: var(--neutral); border-color: #c8cdd5; }
+
+    /* Premium Toggle Switch style for progress checking */
+    .mine {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 12px;
+      color: #455672;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .mine input[type="checkbox"] {
+      position: relative;
+      width: 38px;
+      height: 20px;
+      appearance: none;
+      background: #cbd5e1;
+      border-radius: 10px;
+      outline: none;
+      transition: background 0.25s ease;
+      cursor: pointer;
+      margin: 0;
+    }
+
+    .mine input[type="checkbox"]:checked {
+      background: var(--ok);
+    }
+
+    .mine input[type="checkbox"]::before {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+      transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .mine input[type="checkbox"]:checked::before {
+      transform: translateX(18px);
+    }
+
+    .empty {
+      margin-top: 14px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 24px;
+      text-align: center;
+      color: var(--txt-soft);
+    }
+
+    .todo-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(16, 27, 45, 0.4);
+      backdrop-filter: blur(2px);
+      z-index: 29;
+      transition: opacity 0.3s ease;
+      opacity: 1;
+    }
+    .todo-backdrop.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .todo-fab {
+      position: fixed;
+      right: -2px;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 30;
+      border: 1px solid #2f5a85;
+      border-right: 0;
+      border-radius: 8px 0 0 8px;
+      width: 36px;
+      min-height: 112px;
+      padding: 8px 4px;
+      background: linear-gradient(180deg, #1d486f 0%, #2e628f 100%);
+      color: #f4f9ff;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      writing-mode: vertical-rl;
+      text-orientation: mixed;
+      box-shadow: 0 10px 20px rgba(18, 58, 97, 0.24);
+      cursor: pointer;
+      transition: transform .2s ease, box-shadow .2s ease, background 0.2s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .todo-fab:hover {
+      transform: translate(-1px, calc(-50% - 1px));
+      box-shadow: 0 12px 22px rgba(18, 58, 97, 0.3);
+      background: linear-gradient(180deg, #245889 0%, #3570a2 100%);
+    }
+
+    .todo-panel {
+      position: fixed;
+      right: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: min(340px, calc(100vw - 8px));
+      max-height: min(80vh, 640px);
+      display: flex;
+      flex-direction: column;
+      border: 1px solid rgba(176, 198, 221, 0.95);
+      border-right: 0;
+      border-radius: 12px 0 0 12px;
+      background:
+        radial-gradient(circle at 18% 8%, rgba(222, 236, 251, 0.78) 0%, rgba(255, 255, 255, 0) 48%),
+        linear-gradient(180deg, #fcfeff 0%, #f5f9fe 100%);
+      box-shadow: -10px 14px 28px rgba(19, 54, 95, 0.12);
+      backdrop-filter: blur(6px);
+      overflow: hidden;
+      z-index: 31;
+      transition: opacity .25s ease, transform .25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .todo-panel.hidden {
+      opacity: 0;
+      transform: translate(110%, -50%);
+      pointer-events: none;
+    }
+
+    .todo-head {
+      padding: 10px 10px 9px;
+      border-bottom: 1px solid #dde8f5;
+      background: linear-gradient(180deg, rgba(232, 242, 252, 0.84), rgba(246, 251, 255, 0.9));
+    }
+
+    .bottom-sheet-handle {
+      display: none;
+    }
+
+    .todo-topline {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .todo-topline h3 {
+      margin: 0;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      color: var(--brand);
+    }
+
+    .todo-close {
+      border: 1px solid #c3d4e7;
+      background: #f9fcff;
+      color: #3b5f86;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 5px 9px;
+      cursor: pointer;
+      transition: background 0.18s;
+    }
+    
+    .todo-close:hover {
+      background: #ebf3fc;
+    }
+
+    .todo-body {
+      padding: 12px;
+      overflow: auto;
+      display: grid;
+      gap: 10px;
+    }
+
+    .todo-form {
+      display: grid;
+      gap: 8px;
+    }
+
+    .todo-input {
+      flex: 1;
+      min-width: 0;
+      border: 1px solid #c9d9eb;
+      border-radius: 8px;
+      padding: 8px 10px;
+      font-size: 13px;
+      outline: none;
+      background: rgba(255,255,255,0.9);
+      transition: border-color 0.2s;
+    }
+    
+    .todo-input:focus {
+      border-color: #8cb2dc;
+    }
+
+    .todo-time-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr auto;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .todo-time {
+      border: 1px solid #c9d9eb;
+      border-radius: 8px;
+      padding: 7px 8px;
+      font-size: 12px;
+      color: #1f3351;
+      background: rgba(255,255,255,0.9);
+      outline: none;
+      cursor: pointer;
+    }
+
+    .todo-add {
+      border: 0;
+      border-radius: 8px;
+      min-width: 62px;
+      padding: 8px 14px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+      background: linear-gradient(180deg, #1d4f7d 0%, #2a638f 100%);
+      color: #f3f9ff;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .todo-add:hover {
+      background: linear-gradient(180deg, #245c92 0%, #3371a3 100%);
+    }
+
+    .todo-list {
+      display: grid;
+      gap: 6px;
+    }
+
+    .todo-empty {
+      font-size: 11px;
+      color: #5d7090;
+      background: #eff5fc;
+      border: 1px dashed #c1d4ea;
+      border-radius: 8px;
+      padding: 12px;
+      text-align: center;
+    }
+
+    .todo-item {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 8px;
+      border: 1px solid #d6e3f1;
+      border-radius: 8px;
+      padding: 8px 10px;
+      background: rgba(255, 255, 255, 0.9);
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02);
+      transition: all 0.2s;
+    }
+
+    .todo-mainline {
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+      min-width: 0;
+      flex: 1;
+    }
+
+    .todo-check {
+      margin-top: 3px;
+      accent-color: var(--brand);
+      width: 15px;
+      height: 15px;
+      cursor: pointer;
+    }
+
+    .todo-text {
+      font-size: 12px;
+      color: #1f3351;
+      line-height: 1.3;
+      word-break: break-word;
+      font-weight: 600;
+    }
+
+    .todo-item.done .todo-text {
+      text-decoration: line-through;
+      color: #6f8099;
+    }
+
+    .todo-remove {
+      border: 0;
+      background: transparent;
+      color: #7b8ba3;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 2px;
+      line-height: 1;
+      cursor: pointer;
+      opacity: 0.6;
+      transition: opacity 0.2s;
+    }
+    
+    .todo-remove:hover {
+      opacity: 1;
+      color: var(--danger);
+    }
+
+    @media (max-width: 1120px) {
+      .toolbar { position: static; }
+      .top-progress-banner { grid-template-columns: 1fr; }
+      .banner-body { flex-direction: column; align-items: stretch; }
+      .banner-copy { min-width: 0; }
+      .banner-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); min-width: 0; }
+      .analytics-content { grid-template-columns: 1fr; gap: 14px; }
+      .chart-container { min-height: auto; }
+    }
+
+    /* Enhanced Analytics Styling */
+    .analytics-card {
+      background: linear-gradient(135deg, #ffffff 0%, #f4f8ff 100%);
+      border: 1px solid #c3d5eb;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(15, 76, 129, 0.08);
+      margin: 18px 0 14px;
+      overflow: hidden;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .analytics-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 22px;
+      border-bottom: 1px solid #dce7f5;
+      background: linear-gradient(90deg, #f8fbff 0%, #edf4fc 100%);
+    }
+
+    .analytics-title-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .analytics-title-group h2 {
+      margin: 0;
+      font-size: 17px;
+      font-weight: 800;
+      color: #0f3d69;
+      letter-spacing: -0.01em;
+    }
+
+    .analytics-badge {
+      background: #e0f2fe;
+      color: #0284c7;
+      font-size: 10px;
+      font-weight: 800;
+      padding: 3px 8px;
+      border-radius: 999px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .analytics-toggle {
+      border: 1px solid var(--border);
+      background: #fff;
+      color: var(--txt-soft);
+      border-radius: 10px;
+      padding: 6px 12px;
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    .analytics-toggle:hover {
+      border-color: #a3bbd8;
+      color: var(--txt);
+    }
+
+    .analytics-toggle svg {
+      transition: transform 0.3s;
+    }
+
+    .analytics-tabs {
+      display: none;
+      padding: 10px 16px 8px;
+      gap: 8px;
+      background: linear-gradient(90deg, #f8fbff 0%, #edf4fc 100%);
+      border-bottom: 1px solid #dce7f5;
+    }
+
+    .analytics-card.collapsed .analytics-tabs {
+      display: none !important;
+    }
+
+    @media (max-width: 900px) {
+      .analytics-tabs {
+        display: flex;
+        justify-content: center;
+      }
+      .a-tab {
+        flex: 1;
+        border: 1px solid #c8d9ed;
+        background: #fff;
+        color: var(--txt-soft);
+        padding: 9px 8px;
+        font-size: 12px;
+        font-weight: 800;
+        border-radius: 10px;
+        cursor: pointer;
+        text-align: center;
+        transition: all 0.2s ease;
+        user-select: none;
+        -webkit-tap-highlight-color: transparent;
+      }
+      .a-tab.active {
+        background: var(--brand);
+        color: #fff;
+        border-color: var(--brand);
+        box-shadow: 0 4px 10px rgba(15, 76, 129, 0.25);
+      }
+
+      .analytics-content {
+        display: flex !important;
+        flex-direction: row !important;
+        width: 300% !important;
+        padding: 14px 0 !important;
+        gap: 0 !important;
+        transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        box-sizing: border-box !important;
+      }
+
+      .chart-container {
+        width: 33.3333% !important;
+        min-width: 33.3333% !important;
+        max-width: 33.3333% !important;
+        flex: 0 0 33.3333% !important;
+        box-sizing: border-box !important;
+        padding: 16px 14px !important;
+        border: none !important;
+        background: transparent !important;
+        box-shadow: none !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+      }
+
+      .chart-wrapper {
+        width: 100% !important;
+        max-width: 280px !important;
+        height: 160px !important;
+        margin: 0 auto !important;
+      }
+    }
+
+    .analytics-card.collapsed .analytics-content {
+      max-height: 0;
+      padding: 0;
+      border-top: none;
+      opacity: 0;
+    }
+
+    .analytics-content {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      padding: 20px;
+      transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), padding 0.4s ease, opacity 0.3s;
+      max-height: 1200px;
+      opacity: 1;
+      overflow: hidden;
+    }
+
+    .chart-container {
+      background: #ffffff;
+      border: 1px solid #d8e5f5;
+      border-radius: 16px;
+      padding: 18px 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 4px 14px rgba(16, 42, 77, 0.04);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .chart-container:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(16, 42, 77, 0.08);
+    }
+
+    .chart-wrapper {
+      position: relative;
+      width: 100%;
+      height: 160px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .doughnut-wrapper {
+      height: 160px;
+    }
+
+    .chart-center-text {
+      position: absolute;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+    }
+
+    .chart-center-text .pct-val {
+      font-size: 24px;
+      font-weight: 800;
+      color: #0f3d69;
+      line-height: 1;
+    }
+
+    .chart-center-text .pct-lbl {
+      font-size: 9px;
+      font-weight: 800;
+      text-transform: uppercase;
+      color: var(--txt-soft);
+      margin-top: 3px;
+    }
+
+    .chart-info {
+      width: 100%;
+      text-align: center;
+      margin-top: 10px;
+    }
+
+    .chart-info h3 {
+      margin: 0 0 4px;
+      font-size: 14px;
+      font-weight: 800;
+      color: #10223e;
+    }
+
+    .chart-info p {
+      margin: 0;
+      font-size: 11px;
+      color: #5b6f90;
+    }
+
+    .chart-legend-box {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 6px;
+      margin-top: 10px;
+      width: 100%;
+    }
+
+    .legend-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 10.5px;
+      font-weight: 700;
+      padding: 4px 9px;
+      border-radius: 8px;
+      background: #f0f5fa;
+      color: #2c3c54;
+      border: 1px solid #e1ebf5;
+    }
+
+    .legend-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    /* Android and Mobile Responsiveness improvements */
+    @media (max-width: 768px) {
+      body {
+        background: var(--bg);
+      }
+      
+      .wrap {
+        width: 100vw;
+        margin: 0;
+        padding: 10px;
+        gap: 10px;
+      }
+      
+      .top-progress-banner {
+        border-radius: 16px;
+        padding: 16px 14px;
+        margin: 6px 0;
+      }
+
+      .banner-pct {
+        font-size: 32px;
+      }
+
+      .banner-kpis {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+      }
+
+      .kpi {
+        padding: 10px;
+        border-radius: 12px;
+      }
+
+      .kpi .v {
+        font-size: 18px;
+      }
+
+      .kpi .l {
+        font-size: 10px;
+      }
+
+      /* Scrollable Filter Pills on Mobile */
+      .pills {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        padding-bottom: 6px;
+        margin-top: 10px;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+      }
+      .pills::-webkit-scrollbar {
+        display: none;
+      }
+      .pill {
+        flex: 0 0 auto;
+        padding: 8px 14px;
+        font-size: 13px;
+        border-radius: 16px;
+      }
+
+      .toolbar {
+        padding: 12px;
+        border-radius: 16px;
+        box-shadow: var(--shadow-soft);
+      }
+
+      .toolbar-row {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+      }
+
+      .search {
+        min-width: 0;
+        width: 100%;
+        height: 44px;
+      }
+
+      .toggle {
+        justify-content: space-between;
+        padding: 10px 12px;
+        font-size: 13px;
+      }
+
+      .toggle input {
+        width: 18px;
+        height: 18px;
+      }
+
+      /* Table reflow to modern card list - 100% visible & touchable */
+      .table-wrap {
+        overflow-x: visible !important;
+        width: 100% !important;
+      }
+
+      table {
+        min-width: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        table-layout: auto !important;
+      }
+
+      table, thead, tbody, th, td, tr {
+        display: block !important;
+        box-sizing: border-box !important;
+      }
+
+      thead, colgroup {
+        display: none !important;
+      }
+
+      .sub {
+        padding: 6px 0 10px !important;
+      }
+
+      tbody tr {
+        background: #ffffff !important;
+        border: 1px solid #c9d9eb !important;
+        border-radius: 16px !important;
+        margin-bottom: 12px !important;
+        padding: 14px !important;
+        box-shadow: 0 4px 14px rgba(10, 36, 72, 0.06) !important;
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 10px !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+        position: relative !important;
+      }
+
+      tbody tr:active {
+        transform: scale(0.985);
+        background: #f7fafe !important;
+      }
+
+      td {
+        padding: 6px 0 !important;
+        border-bottom: none !important;
+        display: flex !important;
+        flex-direction: row !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+        min-height: 36px !important;
+        overflow: visible !important;
+      }
+
+      td:hover {
+        background: transparent !important;
+      }
+
+      td.title-cell {
+        display: block !important;
+        padding-bottom: 10px !important;
+        border-bottom: 1px solid #edf2f8 !important;
+        margin-bottom: 4px !important;
+        font-weight: 700 !important;
+      }
+
+      td.title-cell .course-name {
+        font-size: 15px !important;
+        color: var(--txt) !important;
+        line-height: 1.4 !important;
+        display: block !important;
+      }
+
+      /* Column Labels on Mobile */
+      td[data-label]::before {
+        content: attr(data-label);
+        font-size: 11px;
+        font-weight: 800;
+        color: #5b6e8c;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        flex: 0 0 auto;
+      }
+
+      td.notes-cell {
+        border-top: 1px solid #edf2f8 !important;
+        padding-top: 10px !important;
+        margin-top: 4px !important;
+        justify-content: stretch !important;
+      }
+
+      td.notes-cell::before {
+        display: none !important;
+      }
+
+      .status-wrap {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: flex-end !important;
+      }
+
+      .status-select {
+        max-width: 180px !important;
+        font-size: 12.5px !important;
+        padding: 6px 28px 6px 12px !important;
+        border-radius: 999px !important;
+        cursor: pointer !important;
+      }
+
+      .mine {
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 10px !important;
+        cursor: pointer !important;
+        margin-left: auto !important;
+      }
+
+      .mine input[type="checkbox"] {
+        width: 44px !important;
+        height: 24px !important;
+        flex-shrink: 0 !important;
+        cursor: pointer !important;
+      }
+
+      .mine input[type="checkbox"]::before {
+        width: 20px !important;
+        height: 20px !important;
+      }
+
+      .mine input[type="checkbox"]:checked::before {
+        transform: translateX(20px) !important;
+      }
+
+      .quick-add-btn {
+        width: 100% !important;
+        background: linear-gradient(180deg, #edf5fc 0%, #e2effc 100%) !important;
+        border: 1px solid #b8d6f5 !important;
+        border-radius: 10px !important;
+        padding: 10px 14px !important;
+        font-size: 13px !important;
+        color: var(--brand) !important;
+        font-weight: 800 !important;
+        justify-content: center !important;
+        box-shadow: 0 2px 5px rgba(15, 76, 129, 0.08) !important;
+      }
+
+      .quick-add-btn::after {
+        content: " Planifier ce cours";
+      }
+
+      /* Android bottom-sheet layout for planner panel */
+      .todo-fab {
+        right: 20px;
+        bottom: 20px;
+        top: auto;
+        transform: none;
+        width: 56px;
+        height: 56px;
+        min-height: auto;
+        border-radius: 50%;
+        writing-mode: horizontal-tb;
+        text-orientation: mixed;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+        box-shadow: 0 4px 16px rgba(18, 58, 97, 0.35);
+        border: 1px solid #163e63;
+        font-size: 0;
+      }
+      
+      .todo-fab::before {
+        content: "";
+        width: 24px;
+        height: 24px;
+        background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/></svg>') no-repeat center center;
+        background-size: contain;
+      }
+
+      .todo-fab:hover {
+        transform: scale(1.05);
+      }
+
+      .todo-panel {
+        right: 0;
+        left: 0;
+        bottom: 0;
+        top: auto;
+        transform: none;
+        width: 100vw;
+        max-height: 80vh;
+        border-radius: 20px 20px 0 0;
+        border-left: none;
+        border-top: 1px solid rgba(176, 198, 221, 0.95);
+        box-shadow: 0 -10px 30px rgba(10, 27, 45, 0.18);
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s;
+      }
+
+      .todo-panel.hidden {
+        opacity: 0;
+        transform: translateY(100%);
+        pointer-events: none;
+      }
+
+      .bottom-sheet-handle {
+        display: block;
+        width: 38px;
+        height: 4px;
+        background: #cbd5e1;
+        border-radius: 2px;
+        margin: 2px auto 8px;
+      }
+      
+      .todo-head {
+        padding: 6px 12px 10px;
+      }
+
+      .todo-close {
+        padding: 6px 12px;
+        font-size: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <main class="main">
+      <section class="top-progress-banner" id="topProgressBanner">
+        <div class="banner-main">
+          <div class="banner-main-row">
+            <div class="banner-title" id="bannerTitle">My Lessons Progress</div>
+          </div>
+          <div class="banner-body">
+            <div class="banner-copy">
+              <div class="banner-pct" id="myLessonsPctBanner">0%</div>
+              <div class="banner-meta" id="myLessonsMetaBanner">0 / 0 lessons done</div>
+            </div>
+            <div class="banner-bar-only">
+              <div class="bar"><span id="myLessonsBarBanner"></span></div>
+            </div>
+          </div>
+        </div>
+        <div class="banner-kpis">
+          <div class="kpi"><div class="v" id="kTotal">0</div><div class="l">Visible courses</div></div>
+          <div class="kpi"><div class="v" id="kMine">0</div><div class="l">Mine done</div></div>
+          <div class="kpi"><div class="v" id="kProf">0</div><div class="l">Prof done</div></div>
+          <div class="kpi"><div class="v" id="kHP">0</div><div class="l">Hors programme</div></div>
+        </div>
+      </section>
+
+      <!-- Analytics Section -->
+      <section class="analytics-card" id="analyticsCard">
+        <div class="analytics-header">
+          <div class="analytics-title-group">
+            <svg class="analytics-icon" viewBox="0 0 24 24" width="20" height="20">
+              <path fill="currentColor" d="M19 3H5C3.9 3 3 3.9 3 5V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19V5C21 3.9 20.1 3 19 3M9 17H7V10H9V17M13 17H11V7H13V17M17 17H15V13H17V17Z"/>
+            </svg>
+            <h2>Analyses d'avancement</h2>
+            <span class="analytics-badge">Temps réel</span>
+          </div>
+          <button class="analytics-toggle" id="analyticsToggle" aria-label="Toggle analytics">
+            <span>Masquer</span>
+            <svg viewBox="0 0 24 24" width="16" height="16">
+              <path fill="currentColor" d="M7.41 8.58L12 13.17L16.59 8.58L18 10L12 16L6 10L7.41 8.58Z"/>
+            </svg>
+          </button>
+        </div>
+        <div class="analytics-tabs" id="analyticsTabs">
+          <button class="a-tab active" type="button" data-chart-tab="0" onclick="setMobileChartTab(0)">Global</button>
+          <button class="a-tab" type="button" data-chart-tab="1" onclick="setMobileChartTab(1)">Par Module</button>
+          <button class="a-tab" type="button" data-chart-tab="2" onclick="setMobileChartTab(2)">Statut Faculté</button>
+        </div>
+        <div class="analytics-content" id="analyticsContent">
+          <div class="chart-container">
+            <div class="chart-wrapper doughnut-wrapper">
+              <canvas id="chartGlobal"></canvas>
+              <div class="chart-center-text">
+                <div class="pct-val" id="chartPctVal">0%</div>
+                <div class="pct-lbl">Fait</div>
+              </div>
+            </div>
+            <div class="chart-info">
+              <h3>Avancement Global</h3>
+              <p>Progrès total sur l'ensemble des cours</p>
+              <div class="chart-legend-box" id="legendGlobal"></div>
+            </div>
+          </div>
+          <div class="chart-container">
+            <div class="chart-wrapper">
+              <canvas id="chartModules"></canvas>
+            </div>
+            <div class="chart-info">
+              <h3>Progrès par Module</h3>
+              <p>Pourcentage complété par matière</p>
+              <div class="chart-legend-box" id="legendModules"></div>
+            </div>
+          </div>
+          <div class="chart-container">
+            <div class="chart-wrapper">
+              <canvas id="chartStatus"></canvas>
+            </div>
+            <div class="chart-info">
+              <h3>Statut Faculté</h3>
+              <p>Répartition des cours par statut officiel</p>
+              <div class="chart-legend-box" id="legendStatus"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="toolbar">
+        <div class="toolbar-row">
+          <input class="search" id="search" placeholder="Rechercher cours, professeur...">
+          <label class="toggle"><input type="checkbox" id="hideHP" checked> Exclure Hors Programme</label>
+          <label class="toggle"><input type="checkbox" id="myOnly"> Mes non faits</label>
+        </div>
+        <div class="pills" id="pills"></div>
+      </section>
+
+      <section class="content" id="content"></section>
+    </main>
+  </div>
+
+  <button class="todo-fab" id="todoFab" aria-controls="todoPanel" aria-expanded="false" title="Open to-do">
+    Plan
+  </button>
+
+  <div class="todo-backdrop hidden" id="todoBackdrop"></div>
+
+  <aside class="todo-panel hidden" id="todoPanel" aria-hidden="true">
+    <div class="todo-head">
+      <div class="bottom-sheet-handle"></div>
+      <div class="todo-topline">
+        <h3>To-do</h3>
+        <button class="todo-close" id="todoClose" type="button">Hide</button>
+      </div>
+    </div>
+    <div class="todo-body">
+      <form class="todo-form" id="todoForm">
+        <input class="todo-input" id="todoTitleInput" type="text" placeholder="Task title...">
+        <div class="todo-time-grid">
+          <select class="todo-time" id="todoStartInput" aria-label="Start hour">
+            <option value="06:00">06h00</option><option value="07:00">07h00</option>
+            <option value="08:00">08h00</option><option value="09:00">09h00</option>
+            <option value="10:00">10h00</option><option value="11:00">11h00</option>
+            <option value="12:00" selected>12h00</option><option value="13:00">13h00</option>
+            <option value="14:00">14h00</option><option value="15:00">15h00</option>
+            <option value="16:00">16h00</option><option value="17:00">17h00</option>
+            <option value="18:00">18h00</option><option value="19:00">19h00</option>
+            <option value="20:00">20h00</option>
+          </select>
+          <select class="todo-time" id="todoBlockInput" aria-label="Block duration">
+            <option value="30">+30 min</option>
+            <option value="60">+1h</option>
+            <option value="120" selected>+2h</option>
+            <option value="180">+3h</option>
+          </select>
+          <button class="todo-add" type="submit">Add</button>
+        </div>
+      </form>
+      <div class="todo-list" id="todoList"></div>
+    </div>
+  </aside>
+
+  <script>
+const DATA = [
+  {module: "Gynécologie - Obstétrique", sub: "Gynécologie - Obstétrique", prof: "Prof. Banani", exam: "", courses: [
+    {name: "Les infections génitales", status: "not"},
+    {name: "Les cancers du sein", status: "not"},
+    {name: "Les tumeurs de l’ovaire", status: "not"},
+    {name: "Le cancer de la vulve", status: "not"}
+  ]},
+  {module: "Gynécologie - Obstétrique", sub: "Gynécologie - Obstétrique", prof: "Prof. Errarhay", exam: "", courses: [
+    {name: "Uterus cicatriciel", status: "not"},
+    {name: "Le retard de croissance intra-utérine", status: "not"},
+    {name: "Infections urinaires et grossesse", status: "not"},
+    {name: "Toxoplasmose et grossesse", status: "not"},
+    {name: "Rubéole et grossesse", status: "not"},
+    {name: "Streptocoque B et grossesse", status: "not"},
+    {name: "Les suites de couches normales et pathologiques", status: "not"}
+  ]},
+  {module: "Gynécologie - Obstétrique", sub: "Gynécologie - Obstétrique", prof: "Prof.Bouchikhi", exam: "", courses: [
+    {name: "Grossesse extra-utérine", status: "not"},
+    {name: "Les Maladies trophoblastiques Gestationnelles", status: "not"},
+    {name: "Les avortements", status: "not"},
+    {name: "La rupture prématurée des membranes", status: "not"},
+    {name: "La délivrance normale et pathologique", status: "not"}
+  ]},
+  {module: "Gynécologie - Obstétrique", sub: "Gynécologie - Obstétrique", prof: "Prof.Fdili", exam: "", courses: [
+    {name: "Diagnostic et surveillance de la grossesse", status: "not"},
+    {name: "Hémorragies du 3ème trimestre", status: "not"},
+    {name: "Présentations défléchies", status: "not"}
+  ]},
+  {module: "Gynécologie - Obstétrique", sub: "Gynécologie - Obstétrique", prof: "Prof. Chaara", exam: "", courses: [
+    {name: "Diabète et grossesse", status: "not"},
+    {name: "Pré-éclampsie", status: "not"},
+    {name: "Allo-immunisations foeto-maternelles: Rhésus", status: "not"},
+    {name: "La grossesse gémellaire", status: "not"},
+    {name: "La menace d’accouchement prématuré", status: "not"},
+    {name: "La souffrance foetale aiguë > devenue asphyxie+++", status: "not"}
+  ]},
+  {module: "Gynécologie - Obstétrique", sub: "Gynécologie - Obstétrique", prof: "Prof. Melhouf", exam: "", courses: [
+    {name: "Accouchement normal", status: "not"},
+    {name: "presentation de siege", status: "not"},
+    {name: "Dysplasies cervicales", status: "not"},
+    {name: "Les fibromes utérins", status: "not"},
+    {name: "Cancer du col uterin", status: "not"},
+    {name: "Le cancer de l'endomètre", status: "not"},
+    {name: "Endométriose", status: "not"}
+  ]},
+  {module: "Gynécologie - Obstétrique", sub: "Gynécologie - Obstétrique", prof: "prof S.Jayi", exam: "", courses: [
+    {name: "Abord du couple infertile", status: "not"}
+  ]},
+  {module: "OPHTALMOLOGIE", sub: "OPHTALMOLOGIE", prof: "Prof. Bennis", exam: "", courses: [
+    {name: "Examen clinique en ophtalmologie", status: "not"},
+    {name: "Conduite à tenir devant un oeil rouge", status: "not"},
+    {name: "Conduite à tenir devant une baisse de l’acuité visuelle", status: "not"},
+    {name: "Ptérygion", status: "not"},
+    {name: "Kératocône", status: "not"}
+  ]},
+  {module: "OPHTALMOLOGIE", sub: "OPHTALMOLOGIE", prof: "Prof.Chraibi", exam: "", courses: [
+    {name: "Les traumatismes oculo-orbitaires", status: "not"},
+    {name: "Les conjonctivites", status: "not"},
+    {name: "Les kératites", status: "not"}
+  ]},
+  {module: "OPHTALMOLOGIE", sub: "OPHTALMOLOGIE", prof: "Prof.Abdellaoui", exam: "", courses: [
+    {name: "Les manifestations oculaires liées au diabète", status: "not"},
+    {name: "Le décollement de la rétine rhegmatogène", status: "not"},
+    {name: "La dégénérescence maculaire liées à l'âge", status: "not"},
+    {name: "L’uvéite", status: "not"},
+    {name: "Les strabismes", status: "not"}
+  ]},
+  {module: "OPHTALMOLOGIE", sub: "OPHTALMOLOGIE", prof: "Prof. Benatiya", exam: "", courses: [
+    {name: "CAT devant une exophtalmie", status: "not"},
+    {name: "CAT devant un larmoiement", status: "not"},
+    {name: "Les amétropies", status: "not"},
+    {name: "Les cataractes", status: "not"},
+    {name: "Les glaucomes", status: "not"}
+  ]},
+  {module: "ORL", sub: "ORL", prof: "Prof Benmansour", exam: "", courses: [
+    {name: "La sinusite", status: "not"},
+    {name: "La rhinite allergique", status: "not"},
+    {name: "Les vertiges", status: "not"}
+  ]},
+  {module: "ORL", sub: "ORL", prof: "Prof Ridal", exam: "", courses: [
+    {name: "Les otites moyennes aiguës", status: "not"},
+    {name: "Les otites moyennes chroniques", status: "not"},
+    {name: "Les surdités", status: "not"}
+  ]},
+  {module: "ORL", sub: "ORL", prof: "Prof Ouatassi", exam: "", courses: [
+    {name: "Les otites externes", status: "not"},
+    {name: "La paralysie faciale périphérique", status: "not"}
+  ]},
+  {module: "ORL", sub: "ORL", prof: "Prof Oudidi", exam: "", courses: [
+    {name: "Les cancers du cavum et des voies aéro-digestives supérieures", status: "not"}
+  ]},
+  {module: "ORL", sub: "ORL", prof: "Prof Zaki", exam: "", courses: [
+    {name: "Les nodules thyroïdiens", status: "not"},
+    {name: "Les Angines", status: "not"}
+  ]},
+  {module: "ORL", sub: "ORL", prof: "Prof Kamal", exam: "", courses: [
+    {name: "Les cellulites cervico-faciales", status: "not"},
+    {name: "Les traumatismes maxillo-faciaux", status: "not"}
+  ]},
+  {module: "Médecine Sociale", sub: "Médecine Sociale", prof: "Prof. Tachfouti", exam: "", courses: [
+    {name: "Introduction aux systèmes de santé", status: "not"},
+    {name: "Introduction à l'economie de santé", status: "not"},
+    {name: "Le système de santé au maroc", status: "not"},
+    {name: "Mesure de l’état de santé:La transition epidémiologique", status: "not"},
+    {name: "Epidémiologie et prévention des maladies transmissibles", status: "not"},
+    {name: "Epidémiologie et prophylaxie des cancers", status: "not"},
+    {name: "Investigation d'un episode epidermique", status: "not"},
+    {name: "L’assurance Maladie au Maroc", status: "not"},
+    {name: "La prévention et le depistage", status: "not"},
+    {name: "Programmes de lutte contre les maladies transmissibles: cas de la Leishmaniose", status: "not"},
+    {name: "La surveillance épidémiologique", status: "not"},
+    {name: "Prophylaxie de la tuberculose/méningite au maroc", status: "not"}
+  ]},
+  {module: "Médecine Sociale", sub: "Médecine Sociale", prof: "Prof El.Rhazi", exam: "", courses: [
+    {name: "Epidémiologie Generale", status: "not"},
+    {name: "Les enquêtes épidémiologiques:Partie 1", status: "not"},
+    {name: "Les enquêtes épidémiologiques:Partie 2", status: "not"}
+  ]},
+  {module: "Médecine Sociale", sub: "Médecine Sociale", prof: "Prof. Oumokhtar", exam: "", courses: [
+    {name: "Santé et environnement", status: "not"}
+  ]},
+  {module: "URGENCES/REANIMATION", sub: "URGENCES/REANIMATION", prof: "Prof. Bouazzaoui", exam: "", courses: [
+    {name: "Infections associées aux soins", status: "not"},
+    {name: "Introduction à l’anesthésie", status: "not"}
+  ]},
+  {module: "URGENCES/REANIMATION", sub: "URGENCES/REANIMATION", prof: "Prof. Kechna Hicham", exam: "", courses: [
+    {name: "Pancréatite aiguë grave", status: "not"}
+  ]},
+  {module: "URGENCES/REANIMATION", sub: "URGENCES/REANIMATION", prof: "Prof. Houari", exam: "", courses: [
+    {name: "Les états de choc: généralités", status: "not"},
+    {name: "L’état de choc anaphylactique", status: "not"},
+    {name: "L'état de choc septique", status: "not"},
+    {name: "L'état de choc hémorragique", status: "not"},
+    {name: "L’état de choc cardiogénique", status: "not"},
+    {name: "La nutrition en réanimation", status: "hp"}
+  ]},
+  {module: "URGENCES/REANIMATION", sub: "URGENCES/REANIMATION", prof: "Prof. Boukatta", exam: "", courses: [
+    {name: "Arrêt cardiaque chez l’adulte", status: "not"},
+    {name: "Insuffisance respiratoire aiguë chez l’adulte", status: "not"},
+    {name: "Ventilation artificielle", status: "not"}
+  ]},
+  {module: "URGENCES/REANIMATION", sub: "URGENCES/REANIMATION", prof: "Prof. Harandou", exam: "", courses: [
+    {name: "Les déséquilibres acido-basiques", status: "not"},
+    {name: "Les déséquilibres glycémiques", status: "not"},
+    {name: "Les dyskaliémies", status: "not"},
+    {name: "Les dyscalcémies", status: "not"},
+    {name: "Hémorragique en obstétrique", status: "not"},
+    {name: "Les pathologies hypertensives au cours de la grossesse", status: "not"},
+    {name: "Les dysnatrémies", status: "not"},
+    {name: "Obstruction grave des voies aériennes chez l’enfant", status: "not"},
+    {name: "CAT devant un coma non traumatique", status: "hp"},
+    {name: "La douleur", status: "hp"}
+  ]},
+  {module: "URGENCES/REANIMATION", sub: "URGENCES/REANIMATION", prof: "Prof.Berdai", exam: "", courses: [
+    {name: "L’intubation orotrachéale", status: "not"},
+    {name: "Les abords vasculaires en urgence et en réanimation", status: "not"},
+    {name: "Les envenimations scorpioniques", status: "not"},
+    {name: "Les envenimations ophidiennes", status: "not"}
+  ]},
+  {module: "URGENCES/REANIMATION", sub: "URGENCES/REANIMATION", prof: "Prof. Derkaoui", exam: "", courses: [
+    {name: "Intoxication aiguë", status: "not"},
+    {name: "Intoxication au monoxyde de carbone", status: "not"},
+    {name: "Intoxication aiguë aux pesticides organophosphorés", status: "not"},
+    {name: "Intoxication au paracétamol", status: "not"},
+    {name: "Intoxication par le Paraphénylène-Diamine Takaout", status: "not"},
+    {name: "Accidents d'électrisation", status: "not"},
+    {name: "Noyades", status: "not"}
+  ]},
+  {module: "URGENCES/REANIMATION", sub: "URGENCES/REANIMATION", prof: "Prof. Shimi", exam: "", courses: [
+    {name: "Prise en charge du traumatisme crânien grave à la phase initiale", status: "not"},
+    {name: "Prise en charge du patient polytraumatisé", status: "not"},
+    {name: "Prise en charge du brûlé grave à la phase aiguë", status: "not"}
+  ]}
+];
+
+const MODULE_COLORS = {
+  "Gynécologie - Obstétrique": "#1f5f99",
+  "OPHTALMOLOGIE": "#2d7a49",
+  "ORL": "#9a5c0f",
+  "Médecine Sociale": "#96374f",
+  "URGENCES/REANIMATION": "#5a45bc"
+};
+
+const STORAGE_KEY = "track_personal_done_s9_v2";
+const STATUS_STORAGE_KEY = "track_university_status_s9_v2";
+const TODO_STORAGE_KEY = "track_focus_todo_s9_v2";
+const MODULES = [...new Set(DATA.map(d => d.module))];
+
+let searchQuery = "";
+let activeFilter = "all";
+let hideHP = true;
+let myOnly = false;
+
+let todoItems = loadTodoItems();
+let todoOpen = false;
+
+const mineMap = loadMineMap();
+const statusOverrides = loadStatusOverrides();
+
+function normalize(text) {
+  return (text || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/&/g, " et ")
+    .replace(/[^a-z0-9]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function courseId(group, course) {
+  return `${normalize(group.module)}|${normalize(group.prof)}|${normalize(course.name)}`;
+}
+
+function loadMineMap() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch { return {}; }
+}
+
+function saveMineMap() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(mineMap));
+}
+
+function loadStatusOverrides() {
+  try {
+    const raw = localStorage.getItem(STATUS_STORAGE_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch { return {}; }
+}
+
+function saveStatusOverrides() {
+  localStorage.setItem(STATUS_STORAGE_KEY, JSON.stringify(statusOverrides));
+}
+
+function getUniversityStatus(group, course) {
+  const id = courseId(group, course);
+  return statusOverrides[id] || course.status;
+}
+
+function loadTodoItems() {
+  try {
+    const raw = localStorage.getItem(TODO_STORAGE_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch { return []; }
+}
+
+function saveTodoItems() {
+  localStorage.setItem(TODO_STORAGE_KEY, JSON.stringify(todoItems));
+}
+
+function formatHTime(value) {
+  if (!value || !value.includes(":")) return "--h--";
+  const [h, m] = value.split(":");
+  return `${h}h${m}`;
+}
+
+function computeBlockEnd(start, blockMinutes) {
+  if (!start || !start.includes(":")) return null;
+  const [hRaw, mRaw] = start.split(":");
+  const startHour = Number(hRaw);
+  const startMinute = Number(mRaw);
+  const duration = Number(blockMinutes);
+
+  const startTotal = (startHour * 60) + startMinute;
+  const endTotal = startTotal + duration;
+  if (endTotal > (24 * 60)) return null;
+
+  const endHour = Math.floor(endTotal / 60);
+  const endMinute = endTotal % 60;
+  return `${String(endHour).padStart(2, "0")}:${String(endMinute).padStart(2, "0")}`;
+}
+
+function addTodoItem(title, start, end) {
+  const cleanTitle = (title || "").trim();
+  if (!cleanTitle) return;
+
+  todoItems.unshift({
+    id: `${Date.now()}_${Math.random().toString(16).slice(2, 8)}`,
+    title: cleanTitle,
+    done: false,
+    start,
+    end
+  });
+  saveTodoItems();
+  renderTodo();
+}
+
+function deleteTodoItem(id) {
+  todoItems = todoItems.filter(item => item.id !== id);
+  saveTodoItems();
+  renderTodo();
+}
+
+function toggleTodoItem(id, next) {
+  const found = todoItems.find(item => item.id === id);
+  if (!found) return;
+  found.done = !!next;
+  saveTodoItems();
+  renderTodo();
+}
+
+let chartGlobal = null;
+let chartModules = null;
+let chartStatus = null;
+
+function setTodoOpen(nextOpen) {
+  todoOpen = !!nextOpen;
+  const panel = document.getElementById("todoPanel");
+  const fab = document.getElementById("todoFab");
+  const backdrop = document.getElementById("todoBackdrop");
+  if (!panel || !fab) return;
+
+  panel.classList.toggle("hidden", !todoOpen);
+  panel.setAttribute("aria-hidden", String(!todoOpen));
+  fab.setAttribute("aria-expanded", String(todoOpen));
+  fab.style.display = todoOpen ? "none" : "inline-flex";
+
+  if (backdrop) {
+    backdrop.classList.toggle("hidden", !todoOpen);
+  }
+}
+
+function openTodoFromCourse(courseTitle) {
+  const titleInput = document.getElementById("todoTitleInput");
+  const startInput = document.getElementById("todoStartInput");
+  if (!titleInput || !startInput) return;
+
+  titleInput.value = (courseTitle || "").trim();
+  setTodoOpen(true);
+  startInput.focus();
+}
+
+function renderTodo() {
+  const listEl = document.getElementById("todoList");
+  if (!listEl) return;
+
+  if (!todoItems.length) {
+    listEl.innerHTML = '<div class="todo-empty">No tasks yet. Add your first focus task.</div>';
+  } else {
+    listEl.innerHTML = todoItems.map(item => `
+      <div class="todo-item${item.done ? " done" : ""}">
+        <div class="todo-mainline">
+          <input class="todo-check" type="checkbox" data-todo-check="${item.id}" ${item.done ? "checked" : ""}>
+          <div>
+            <div class="todo-text">${item.title} - ${formatHTime(item.start)} to ${formatHTime(item.end)}</div>
+          </div>
+        </div>
+        <button class="todo-remove" type="button" data-todo-delete="${item.id}">x</button>
+      </div>
+    `).join("");
+  }
+
+  listEl.querySelectorAll("[data-todo-check]").forEach(box => {
+    box.addEventListener("change", () => toggleTodoItem(box.dataset.todoCheck, box.checked));
+  });
+
+  listEl.querySelectorAll("[data-todo-delete]").forEach(btn => {
+    btn.addEventListener("click", () => deleteTodoItem(btn.dataset.todoDelete));
+  });
+}
+
+function initTodoPanel() {
+  const fab = document.getElementById("todoFab");
+  const close = document.getElementById("todoClose");
+  const form = document.getElementById("todoForm");
+  const titleInput = document.getElementById("todoTitleInput");
+  const startInput = document.getElementById("todoStartInput");
+  const blockInput = document.getElementById("todoBlockInput");
+  const backdrop = document.getElementById("todoBackdrop");
+
+  if (fab) fab.addEventListener("click", () => setTodoOpen(true));
+  if (close) close.addEventListener("click", () => setTodoOpen(false));
+  if (backdrop) backdrop.addEventListener("click", () => setTodoOpen(false));
+
+  if (form && titleInput && startInput && blockInput) {
+    form.addEventListener("submit", event => {
+      event.preventDefault();
+      const endTime = computeBlockEnd(startInput.value, blockInput.value);
+      if (!endTime) return;
+      addTodoItem(titleInput.value, startInput.value, endTime);
+      titleInput.value = "";
+    });
+  }
+
+  setTodoOpen(false);
+  renderTodo();
+}
+
+function statusSelect(status, id) {
+  const options = [
+    { value: "not", label: "Non effectué" },
+    { value: "ongoing", label: "En cours" },
+    { value: "hp", label: "Hors programme" },
+    { value: "done", label: "Effectué" }
+  ];
+
+  const klass = status === "done" ? "s-done" : status === "ongoing" ? "s-ongoing" : status === "hp" ? "s-hp" : "s-not";
+  const optionHtml = options.map(opt => `<option value="${opt.value}"${opt.value === status ? " selected" : ""}>${opt.label}</option>`).join("");
+  return `<select class="status-select ${klass}" data-status-select="${id}">${optionHtml}</select>`;
+}
+
+function passesFilters(group, course, id, uniStatus) {
+  if (hideHP && uniStatus === "hp") return false;
+  if (activeFilter !== "all" && group.module !== activeFilter) return false;
+  if (myOnly && mineMap[id]) return false;
+
+  const q = normalize(searchQuery);
+  if (!q) return true;
+
+  return [course.name, group.prof, group.module].some(v => normalize(v).includes(q));
+}
+
+function buildPills() {
+  const pills = [{ id: "all", label: "Tous" }, ...MODULES.map(m => ({ id: m, label: m }))];
+  const root = document.getElementById("pills");
+  root.innerHTML = pills.map(p => `<span class="pill${activeFilter === p.id ? " active" : ""}" data-id="${p.id}">${p.label}</span>`).join("");
+  root.querySelectorAll(".pill").forEach(el => {
+    el.addEventListener("click", () => {
+      activeFilter = el.dataset.id;
+      render();
+    });
+  });
+}
+
+function computeStats(visibleRows) {
+  let total = 0, hp = 0, profDone = 0, myDone = 0;
+  const moduleStats = {};
+  const statusStats = { done: 0, ongoing: 0, not: 0, hp: 0 };
+
+  MODULES.forEach(mod => {
+    moduleStats[mod] = { total: 0, done: 0, pct: 0 };
+  });
+
+  visibleRows.forEach(row => {
+    total += 1;
+    const mod = row.group.module;
+    if (!moduleStats[mod]) {
+      moduleStats[mod] = { total: 0, done: 0, pct: 0 };
+    }
+    moduleStats[mod].total += 1;
+
+    if (row.uniStatus === "hp") {
+      hp += 1;
+      statusStats.hp += 1;
+    } else if (row.uniStatus === "done") {
+      profDone += 1;
+      statusStats.done += 1;
+    } else if (row.uniStatus === "ongoing") {
+      statusStats.ongoing += 1;
+    } else {
+      statusStats.not += 1;
+    }
+
+    if (mineMap[row.id]) {
+      myDone += 1;
+      moduleStats[mod].done += 1;
+    }
+  });
+
+  Object.keys(moduleStats).forEach(mod => {
+    const m = moduleStats[mod];
+    m.pct = m.total > 0 ? (m.done / m.total) * 100 : 0;
+  });
+
+  const lessonsPct = total > 0 ? (myDone / total) * 100 : 0;
+  return { total, hp, profDone, myDone, lessonsPct, moduleStats, statusStats };
+}
+
+function updateCharts(stats, moduleStats, statusStats) {
+  if (typeof Chart === 'undefined') return;
+
+  const analyticsCollapsed = localStorage.getItem("analytics_collapsed") === "true";
+  if (analyticsCollapsed) return;
+
+  const doneCount = stats.myDone;
+  const remainingCount = Math.max(0, stats.total - stats.myDone);
+  
+  // Update Legend Boxes with rich formatted pills
+  const legGlobal = document.getElementById('legendGlobal');
+  if (legGlobal) {
+    legGlobal.innerHTML = `
+      <span class="legend-tag"><span class="legend-dot" style="background:#10b981"></span>${doneCount} Faits</span>
+      <span class="legend-tag"><span class="legend-dot" style="background:#cbd5e1"></span>${remainingCount} À faire</span>
+    `;
+  }
+
+  // 1. Overall Progress Ring (Doughnut Chart)
+  if (!chartGlobal) {
+    const ctx = document.getElementById('chartGlobal').getContext('2d');
+    chartGlobal = new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: ['Fait', 'À faire'],
+        datasets: [{
+          data: [doneCount, remainingCount],
+          backgroundColor: ['#10b981', '#e2e8f0'],
+          borderWidth: 0,
+          hoverOffset: 6
+        }]
+      },
+      options: {
+        cutout: '76%',
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: '#101b2d',
+            padding: 10,
+            cornerRadius: 8,
+            titleFont: { size: 12, weight: 'bold' }
+          }
+        },
+        responsive: true,
+        maintainAspectRatio: false
+      }
+    });
+  } else {
+    chartGlobal.data.datasets[0].data = [doneCount, remainingCount];
+    chartGlobal.update();
+  }
+  document.getElementById('chartPctVal').textContent = `${stats.lessonsPct.toFixed(1)}%`;
+
+  // 2. Progress by Module (Horizontal Bar Chart)
+  const moduleLabels = Object.keys(moduleStats);
+  const moduleData = Object.values(moduleStats).map(m => m.pct);
+  const moduleColors = Object.keys(moduleStats).map(m => MODULE_COLORS[m] || '#0284c7');
+
+  const legModules = document.getElementById('legendModules');
+  if (legModules) {
+    legModules.innerHTML = Object.entries(moduleStats).map(([mod, m]) => {
+      const color = MODULE_COLORS[mod] || '#0284c7';
+      return `<span class="legend-tag"><span class="legend-dot" style="background:${color}"></span>${mod.slice(0, 10)}: ${m.done}/${m.total}</span>`;
+    }).join("");
+  }
+
+  if (!chartModules) {
+    const ctx = document.getElementById('chartModules').getContext('2d');
+    chartModules = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: moduleLabels,
+        datasets: [{
+          label: '% Complété',
+          data: moduleData,
+          backgroundColor: moduleColors,
+          borderRadius: 8,
+          borderWidth: 0,
+          barThickness: 14
+        }]
+      },
+      options: {
+        indexAxis: 'y',
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: '#101b2d',
+            padding: 10,
+            cornerRadius: 8,
+            callbacks: {
+              label: function(context) {
+                return ` ${context.parsed.x.toFixed(1)}% effectué`;
+              }
+            }
+          }
+        },
+        scales: {
+          x: {
+            max: 100,
+            grid: { display: false },
+            ticks: { font: { size: 9, weight: 'bold' }, color: '#64748b' }
+          },
+          y: {
+            grid: { display: false },
+            ticks: {
+              font: { size: 9, weight: 'bold' },
+              color: '#334155',
+              callback: function(value) {
+                const lbl = (this.getLabelForValue && this.getLabelForValue(value)) || moduleLabels[value] || "";
+                return lbl.length > 12 ? lbl.slice(0, 10) + '..' : lbl;
+              }
+            }
+          }
+        },
+        responsive: true,
+        maintainAspectRatio: false
+      }
+    });
+  } else {
+    chartModules.data.labels = moduleLabels;
+    chartModules.data.datasets[0].data = moduleData;
+    chartModules.data.datasets[0].backgroundColor = moduleColors;
+    chartModules.update();
+  }
+
+  // 3. Faculty Status Distribution (Doughnut Chart)
+  const statusLabels = ['Effectué', 'En cours', 'Non fait', 'Hors prog.'];
+  const statusCounts = [statusStats.done || 0, statusStats.ongoing || 0, statusStats.not || 0, statusStats.hp || 0];
+  const statusColors = ['#10b981', '#f59e0b', '#ef4444', '#64748b'];
+
+  const legStatus = document.getElementById('legendStatus');
+  if (legStatus) {
+    legStatus.innerHTML = `
+      <span class="legend-tag"><span class="legend-dot" style="background:#10b981"></span>${statusStats.done || 0} Effectués</span>
+      <span class="legend-tag"><span class="legend-dot" style="background:#f59e0b"></span>${statusStats.ongoing || 0} En cours</span>
+      <span class="legend-tag"><span class="legend-dot" style="background:#ef4444"></span>${statusStats.not || 0} Non faits</span>
+      <span class="legend-tag"><span class="legend-dot" style="background:#64748b"></span>${statusStats.hp || 0} HP</span>
+    `;
+  }
+
+  if (!chartStatus) {
+    const ctx = document.getElementById('chartStatus').getContext('2d');
+    chartStatus = new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: statusLabels,
+        datasets: [{
+          data: statusCounts,
+          backgroundColor: statusColors,
+          borderWidth: 0,
+          hoverOffset: 6
+        }]
+      },
+      options: {
+        cutout: '65%',
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: '#101b2d',
+            padding: 10,
+            cornerRadius: 8
+          }
+        },
+        responsive: true,
+        maintainAspectRatio: false
+      }
+    });
+  } else {
+    chartStatus.data.datasets[0].data = statusCounts;
+    chartStatus.update();
+  }
+}
+
+function render() {
+  buildPills();
+
+  const visibleRows = [];
+  DATA.forEach(group => {
+    group.courses.forEach(course => {
+      const id = courseId(group, course);
+      const uniStatus = getUniversityStatus(group, course);
+      if (!passesFilters(group, course, id, uniStatus)) return;
+      visibleRows.push({ group, course, id, uniStatus });
+    });
+  });
+
+  const stats = computeStats(visibleRows);
+
+  document.getElementById("kTotal").textContent = stats.total;
+  document.getElementById("kHP").textContent = stats.hp;
+  document.getElementById("kProf").textContent = stats.profDone;
+  document.getElementById("kMine").textContent = stats.myDone;
+  document.getElementById("myLessonsPctBanner").textContent = `${stats.lessonsPct.toFixed(1)}%`;
+  document.getElementById("myLessonsMetaBanner").textContent = `${stats.myDone} / ${stats.total} lessons done`;
+  document.getElementById("myLessonsBarBanner").style.width = `${stats.lessonsPct.toFixed(2)}%`;
+
+  // Render analytics charts with updated stats
+  updateCharts(stats, stats.moduleStats, stats.statusStats);
+  if (typeof updateMobileChartTabs === 'function') {
+    updateMobileChartTabs();
+  }
+
+  const grouped = {};
+  visibleRows.forEach(({ group, course, id, uniStatus }) => {
+    if (!grouped[group.module]) grouped[group.module] = {};
+    const subKey = `${group.sub}|${group.prof}`;
+    if (!grouped[group.module][subKey]) {
+      grouped[group.module][subKey] = { sub: group.sub, prof: group.prof, rows: [] };
+    }
+    grouped[group.module][subKey].rows.push({ course, id, uniStatus });
+  });
+
+  const content = document.getElementById("content");
+
+  if (Object.keys(grouped).length === 0) {
+    content.innerHTML = '<div class="empty">Aucun cours ne correspond aux filtres actifs.</div>';
+    return;
+  }
+
+  content.innerHTML = Object.entries(grouped).map(([module, subMap]) => {
+    const color = MODULE_COLORS[module] || "#5f6d87";
+    const moduleRows = Object.values(subMap).reduce((acc, x) => acc + x.rows.length, 0);
+
+    const subs = Object.values(subMap).map(section => {
+      const rows = section.rows.map(({ course, id, uniStatus }) => {
+        const checked = mineMap[id] ? "checked" : "";
+        return `
+          <tr>
+            <td class="title-cell"><span class="course-name">${course.name}</span></td>
+            <td data-label="Faculté"><span class="status-wrap">${statusSelect(uniStatus, id)}</span></td>
+            <td data-label="Mon statut">
+              <label class="mine">
+                <input type="checkbox" data-course-id="${id}" ${checked}>
+                <span>${mineMap[id] ? "Fait" : "Pas encore"}</span>
+              </label>
+            </td>
+            <td class="muted" data-label="Date">-</td>
+            <td class="muted notes-cell">
+              <span class="note-copy"></span>
+              <button class="quick-add-btn" type="button" data-quick-add aria-label="Add to to-do">+</button>
+            </td>
+          </tr>`;
+      }).join("");
+
+      return `
+        <div class="sub">
+          <div class="sub-title">${section.prof}</div>
+          <div class="table-wrap">
+            <table>
+              <colgroup>
+                <col class="col-course">
+                <col class="col-status">
+                <col class="col-progress">
+                <col class="col-date">
+                <col class="col-notes">
+              </colgroup>
+              <thead>
+                <tr>
+                  <th>Cours</th>
+                  <th>Statut faculté</th>
+                  <th>Mon avancement</th>
+                  <th>Date</th>
+                  <th>Notes</th>
+                </tr>
+              </thead>
+              <tbody>${rows}</tbody>
+            </table>
+          </div>
+        </div>`;
+    }).join("");
+
+    return `
+      <section class="module">
+        <div class="module-head" style="border-left-color:${color}">
+          <h2>${module}</h2>
+          <div class="module-meta">${moduleRows} cours visibles</div>
+        </div>
+        ${subs}
+      </section>`;
+  }).join("");
+
+  content.querySelectorAll('input[data-course-id]').forEach(cb => {
+    cb.addEventListener('change', () => {
+      mineMap[cb.dataset.courseId] = cb.checked;
+      saveMineMap();
+      render();
+    });
+  });
+
+  content.querySelectorAll('select[data-status-select]').forEach(select => {
+    select.addEventListener('change', () => {
+      statusOverrides[select.dataset.statusSelect] = select.value;
+      saveStatusOverrides();
+      render();
+    });
+  });
+
+  content.querySelectorAll('[data-quick-add]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const row = btn.closest('tr');
+      if (!row) return;
+      const nameEl = row.querySelector('.course-name');
+      if (nameEl) openTodoFromCourse(nameEl.textContent || '');
+    });
+  });
+}
+
+document.getElementById("search").addEventListener("input", e => {
+  searchQuery = e.target.value;
+  render();
+});
+
+document.getElementById("hideHP").addEventListener("change", e => {
+  hideHP = e.target.checked;
+  render();
+});
+
+document.getElementById("myOnly").addEventListener("change", e => {
+  myOnly = e.target.checked;
+  render();
+});
+
+let currentMobileChartTab = 0;
+
+function setMobileChartTab(tabIdx) {
+  currentMobileChartTab = Number(tabIdx) || 0;
+  const track = document.getElementById('analyticsContent');
+  const tabs = document.querySelectorAll('.a-tab');
+
+  tabs.forEach((tab, idx) => {
+    tab.classList.toggle('active', idx === currentMobileChartTab);
+  });
+
+  if (track) {
+    if (window.innerWidth <= 900) {
+      const shiftPct = currentMobileChartTab * 33.333333;
+      track.style.transform = `translateX(-${shiftPct}%)`;
+    } else {
+      track.style.transform = 'none';
+    }
+  }
+
+  setTimeout(() => {
+    if (chartGlobal) chartGlobal.resize();
+    if (chartModules) chartModules.resize();
+    if (chartStatus) chartStatus.resize();
+  }, 50);
+}
+
+window.addEventListener('resize', () => {
+  setMobileChartTab(currentMobileChartTab);
+});
+
+// Run everything inside window onload to guarantee all external scripts (like Chart.js) are loaded and ready
+window.addEventListener('load', () => {
+  render();
+  initTodoPanel();
+
+  // Initial call to set mobile tab position
+  setMobileChartTab(0);
+
+  // Collapsible Analytics card logic with state memory
+  let analyticsCollapsed = localStorage.getItem("analytics_collapsed") === "true";
+  const analyticsCard = document.getElementById("analyticsCard");
+  const analyticsToggle = document.getElementById("analyticsToggle");
+  const toggleText = analyticsToggle.querySelector("span");
+
+  function updateAnalyticsCollapseState() {
+    analyticsCard.classList.toggle("collapsed", analyticsCollapsed);
+    toggleText.textContent = analyticsCollapsed ? "Afficher" : "Masquer";
+  }
+
+  if (analyticsToggle && analyticsCard) {
+    analyticsToggle.addEventListener("click", () => {
+      analyticsCollapsed = !analyticsCollapsed;
+      localStorage.setItem("analytics_collapsed", analyticsCollapsed);
+      updateAnalyticsCollapseState();
+      if (!analyticsCollapsed) {
+        render();
+        setMobileChartTab(currentMobileChartTab);
+      }
+    });
+    updateAnalyticsCollapseState();
+  }
+});
+  </script>
+</body>
+</html>
